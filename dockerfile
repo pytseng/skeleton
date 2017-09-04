@@ -1,5 +1,5 @@
 FROM busybox
 
 
-ADD build/distribution/skeleton.tar
+ADD build/distributions/skeleton.tar .
 
