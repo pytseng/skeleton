@@ -29,7 +29,7 @@ public class TagController {
 
     @PUT
     @Path("/tags/{tag}")
-    public void toggleTag(Integer rID, @PathParam("tag") String tagName) {
+    public void toggleTag(int rID, @PathParam("tag") String tagName) {
         tags.insert(rID, tagName);
     }
 
@@ -44,6 +44,6 @@ public class TagController {
     @Path("/netid")
     @Produces(MediaType.TEXT_PLAIN)
     public String returnNetID () {
-        return "382";
+        return "pt382";
     }
 }
