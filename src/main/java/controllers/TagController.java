@@ -1,9 +1,16 @@
 package controllers;
 
+import api.CreateTagRequest;
 import api.ReceiptResponse;
+import api.TagResponse;
+import dao.ReceiptDao;
 import dao.TagDao;
+import generated.tables.records.TagsRecord;
 import generated.tables.records.ReceiptsRecord;
+import jdk.nashorn.internal.runtime.Debug;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -37,6 +44,6 @@ public class TagController {
     @Path("/netid")
     @Produces(MediaType.TEXT_PLAIN)
     public String returnNetID () {
-        return "pt382";
+        return "382";
     }
 }
