@@ -1,4 +1,5 @@
 import controllers.ReceiptController;
+import controllers.TagController;
 import controllers.StaticHtmlController;
 import dao.ReceiptDao;
 import dao.TagDao;
