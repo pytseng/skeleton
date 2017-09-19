@@ -2,11 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Receipt App</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/style.css">
 
+    <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        $(function(){
+            $("#inputbox").toggle();
+
+            var api = "http://localhost:8080";
+
+            var all_tags = {};
+            var all_receipts = {};
+            var mName = "apple";
+            var mAmount = 0;
+            now_id = 0;
+
+            getReceipts();
+
+            $("#add-receipt").click(function() {
+                $("#inputbox").toggle();
+                $("#merchant").val("");
+                $("#amount").val("");
+            });
+            $("#cancel-receipt").click(function() {
+                $("#inputbox").toggle();
+                $("#merchant").val("");
+                $("#amount").val("");
+            });
+            $("#save-receipt").click(function() {
+                // TODO: check if NULL
+                var mName = $("#merchant").val();
+                var mAmount = $("#amount").val();
+                // console.log(mName+mAmount);
+                postReceipt(mName, parseInt(mAmount));
+                $("#receiptList").empty();
+                getReceipts();
+                $("#inputbox").toggle();
+            });
+            function addClickEvent() {
+                $(".add-tag").click(function() {
+                    now_id = parseInt(this.name);
+                    x = now_id-1;
+
+                    var tempID = x + all_receipts[now_id-1].merchantName;
+                    $(".tagbox").detach().appendTo("#"+tempID);
+                    $(".tag_input").val("");
+                    $(".tagbox").toggle();
+
+                });
+                $(".tagValue").click(function() {
+                    console.log(this.name);
+                    var s = this.name.split(",")
+                    addTag(parseInt(s[0]),s[1]);
+                    $("#receiptList").empty();
+                    getReceipts();
+                });
+                $(document).keypress(function(e) {
+                    if (e.keyCode == '13') {
+                        $(".tagbox").detach().appendTo("#receiptHeader");
+                        $(".tagbox").toggle();
+                        addTag(now_id,$(".tag_input").val());
+                        $("#receiptList").empty();
+                        getReceipts();
+                        now_id = 0;
+                    }
+                });
+            }
+
+            // get all receipts and show on the window
+            function getReceipts() {
+                $.ajax({
+                    url: api + "/receipts",
+                    dataType: 'json',
+                    async: false,
+                    success: function(receipts) {
+                        all_receipts = receipts;
+
+                        $.ajax({
+                            url: api + "/tags",
+                            dataType: 'json',
+                            async: false,
+                            success: function(tags) {
+                                // console.log(tags);
+                                all_tags = tags;
+                            }
+                        });
+                        for(var i = all_receipts.length-1 ; i >= 0 ; i--) {
+                            var receipt = all_receipts[i];
+                            var receipt_id = receipt.id;
+                            var tag = [];
+                            for(var j = 0 ; j < all_tags.length ; j++) {
+                                if (all_tags[j].receipt_id === receipt.id) {
+                                    tag.push(all_tags[j].tag_name);
+                                }
+                            }
+                            var tempID = i + receipt.merchantName;
+                            $(`<div class="receipt row" id="${tempID}">
+                                <div class="time col-sm-2"> ${receipt.created}</div>
+                                <div class="merchant col-sm-3">${receipt.merchantName}</div>
+                                <div class="amount col-sm-1">${receipt.value}</div>
+                                <div class="tags" col-sm-6></div></div>`)
+                                .appendTo($("#receiptList"));
+                            $("#"+tempID).append("<input type='button' class='add-tag' name='"+receipt.id+"' value='Add +'>");
+                            for (var j = 0 ; j < tag.length ; j++) {
+                                $("#"+tempID).append("<a href='#' class='tagValue' name='"+receipt.id+","+tag[j]+"'>"+tag[j]+"</a> ");
+                            }
+
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+                $(".tagbox").hide();
+                addClickEvent();
+            }
+            // post a receipt
+            function postReceipt(merchantName, merchantAmount) {
+                var sendReceipt = {
+                    merchant: merchantName,
+                    amount: merchantAmount
+                };
+                console.log(JSON.stringify(sendReceipt));
+                $.ajax({
+                    method: "POST",
+                    url: api + "/receipts",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    data: JSON.stringify(sendReceipt),
+                    async: false
+                });
+            }
+            // add tag
+            function addTag(itemID, tagName) {
+                var URL = api + "/tags/" + tagName;
+                console.log(URL);
+                $.ajax({
+                    method: "PUT",
+                    url: URL,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    data: JSON.stringify(itemID),
+                    async: false
+                });
+            }
+        })
+    </script>
 </head>
 <body>
 <div class="container">
@@ -25,16 +168,22 @@
         <label for="amount">amount</label>
         <input type="text" id="amount"><br>
 
-        <button id="save-receipt">save</button>
-        <button id="cancel-receipt">cancel</button>
+        <input type="button" value="Cancel" id="cancel-receipt">
+        <input type="submit" value="Save" id="save-receipt">
     </div>
-    <div id="receiptList" class="row">
+    <span class="tagbox">
+        <input type="text" placeholder="tag name" class="tag_input">
+    </span>
+    <div id="receiptHead" class="row">
         <div class="row">
             <div class="col-sm-2 divTableCell">Time</div>
             <div class="col-sm-3 divTableCell">&nbsp;Merchant</div>
             <div class="col-sm-1 divTableCell">&nbsp;$</div>
             <div class="col-sm-6 divTableCell">&nbsp;Tags</div>
         </div>
+    </div>
+    <div id="receiptList" class="row">
+
         <!--<div class="receipt row">-->
             <!--<div class="col-sm-2 time">12/3/2018&nbsp;</div>-->
             <!--<div class="col-sm-3 merchant">boba&nbsp;</div>-->
@@ -45,13 +194,10 @@
                 <!--<span class="tagValue"></span>-->
             <!--</div>-->
         <!--</div>-->
+    </div>
 </div>
-</div>
-<script
-  src="https://code.jquery.com/jquery-3.2.1.min.js"
-  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-  crossorigin="anonymous"></script> 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>  
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="js/index.js"></script>
 </body>
 </html>
