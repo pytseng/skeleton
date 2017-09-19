@@ -41,6 +41,13 @@ public class TagController {
     }
 
     @GET
+    @Path("/tags")
+    public List<TagResponse> getAllTags () {
+        List<TagsRecord> tagRecords = tags.getAllTags();
+        return tagRecords.stream().map(TagResponse::new).collect(toList());
+    }
+
+    @GET
     @Path("/netid")
     @Produces(MediaType.TEXT_PLAIN)
     public String returnNetID () {

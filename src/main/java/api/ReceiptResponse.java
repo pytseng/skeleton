@@ -26,6 +26,9 @@ public class ReceiptResponse {
     BigDecimal value;
 
     @JsonProperty
+    BigDecimal tags;
+
+    @JsonProperty
     Time created;
 
     public ReceiptResponse(ReceiptsRecord dbRecord) {

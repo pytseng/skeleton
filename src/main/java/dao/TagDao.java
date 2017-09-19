@@ -23,10 +23,8 @@ public class TagDao {
     }
 
     public void insert(int receipt_id, String tag_name) {
-        // Untag check
         if (dsl.selectFrom(TAGS).where(TAGS.RECEIPT_ID.eq(receipt_id)).and(TAGS.TAG_NAME.eq(tag_name)).fetchOne() != null) {
             dsl.delete(TAGS).where(TAGS.RECEIPT_ID.eq(receipt_id)).and(TAGS.TAG_NAME.eq(tag_name)).execute();
-//            System.out.println("=========Untag:" + dsl.selectFrom(TAGS).where(TAGS.RECEIPT_ID.in(receipt_id)).fetch());
             return;
         }
         TagsRecord tagsRecord = dsl
@@ -39,7 +37,6 @@ public class TagDao {
         System.out.println("\n\n");
         checkState(tagsRecord != null && tagsRecord.getId() != null, "Insert failed");
 
-//        return tagsRecord.getReceiptId();
     }
 
     public List<ReceiptsRecord> getReceiptsFromTag(String tag_name) {
@@ -49,8 +46,10 @@ public class TagDao {
         for (int i = 0 ; i < List_tagName.size() ; i ++) {
             receiptsIDList[i] = Integer.parseInt(List_tagName.get(i).get("receipt_id").toString());
         }
-//        System.out.println(List_tagName + "\n\n");
-//        System.out.println(dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.in(receiptsIDList)).fetch());
         return dsl.selectFrom(RECEIPTS).where(RECEIPTS.ID.in(receiptsIDList)).fetch();
     }
+
+    public List<TagsRecord> getAllTags() {
+        return dsl.selectFrom(TAGS).fetch();
+   }
 }
