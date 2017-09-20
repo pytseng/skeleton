@@ -5,17 +5,15 @@
     <title>Receipt App</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         $(function(){
             $("#inputbox").toggle();
 
-            var api = "http://ec2-52-15-200-86.us-east-2.compute.amazonaws.com:8080";
-
+            var api = "http://localhost:8080";
             var all_tags = {};
             var all_receipts = {};
-            var mName = "apple";
+            var mName = "something";
             var mAmount = 0;
             now_id = 0;
 
@@ -32,10 +30,8 @@
                 $("#amount").val("");
             });
             $("#save-receipt").click(function() {
-                // TODO: check if NULL
                 var mName = $("#merchant").val();
                 var mAmount = $("#amount").val();
-                // console.log(mName+mAmount);
                 postReceipt(mName, parseInt(mAmount));
                 $("#receiptList").empty();
                 getReceipts();
@@ -53,7 +49,6 @@
 
                 });
                 $(".tagValue").click(function() {
-                    console.log(this.name);
                     var s = this.name.split(",")
                     addTag(parseInt(s[0]),s[1]);
                     $("#receiptList").empty();
@@ -85,7 +80,6 @@
                             dataType: 'json',
                             async: false,
                             success: function(tags) {
-                                // console.log(tags);
                                 all_tags = tags;
                             }
                         });
@@ -125,7 +119,6 @@
                     merchant: merchantName,
                     amount: merchantAmount
                 };
-                console.log(JSON.stringify(sendReceipt));
                 $.ajax({
                     method: "POST",
                     url: api + "/receipts",
@@ -138,7 +131,6 @@
             // add tag
             function addTag(itemID, tagName) {
                 var URL = api + "/tags/" + tagName;
-                console.log(URL);
                 $.ajax({
                     method: "PUT",
                     url: URL,
@@ -183,7 +175,7 @@
         </div>
     </div>
     <div id="receiptList" class="row">
-
+<!--for quick check-->
         <!--<div class="receipt row">-->
             <!--<div class="col-sm-2 time">12/3/2018&nbsp;</div>-->
             <!--<div class="col-sm-3 merchant">boba&nbsp;</div>-->
@@ -198,6 +190,6 @@
 </div>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="js/index.js"></script>
+<!--<script src="js/index.js"></script>-->
 </body>
 </html>
