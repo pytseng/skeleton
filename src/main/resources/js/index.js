@@ -1,182 +1,148 @@
-// const api = "http://ec2-52-15-200-86.us-east-2.compute.amazonaws.com:8080";
-// const api = "http://localhost:8080";
-//
-//
-// var all_tags = {};
-//
-// var get_tags = function(){
-//     $.ajax({
-//         url: api + "/tags",
-//         dataType: 'json',
-//     }).done(function(tags) {
-//         console.log(tags);
-//         all_tags = tags;
-//     });
-// }
-//
-// var fxn_add_tag = function(merchantID, tagName){
-//     $.ajax({
-//         method: "PUT",
-//         url: api + "/tags/" + tagName,
-//         contentType: "application/json; charset=utf-8",
-//         dataType: 'json',
-//         data: JSON.stringify(merchantID),
-//         async: false,
-//     }).done(function() {
-//         console.log(merchantID,":", tagName)
-//     })
-// }
-//
-// var now_id = 0;
-// function addClickEvent() {
-//
-//     $(".add_tag").click(function() {
-//         $(".tag_input").val("");
-//         $(".tagbox").toggle();
-//         now_id = parseInt(this.name);
-//     });
-//     $(".tag_input").on('keyup', function (e) {
-//         // $(".tagbox").toggle();
-//         fxn_add_tag(now_id, $(".tag_input").val());
-//         $("#receiptList").empty();
-//         get_receipts();
-//         now_id = 0;
-//         // console.log(now_id);
-//     });
-//     $(".tagValue").click(function() {
-//         console.log(this.name);
-//         var s = this.name.split(",")
-//         fxn_add_tag(parseInt(s[0]), s[1]);
-//         $("#receiptList").empty();
-//         get_receipts();
-//     });
-// }
-//
-// // var activate_tag = function() {
-// //     $(".tag_input").on('keyup', function (e) {
-// //         var tag_input_val = $(this).val();
-// //         if (e.keyCode == 13) {
-// //             $(this).parent().append("<span>" + tag_input_val + "</span>");
-// //         }
-// //     });
-// // }
-//
-//
-// $(".tag_input")
-//
-// var get_receipts = function(){
-//     get_tags();
-//
-//     $.getJSON(api+"/receipts", function(receipts){
-//         for(var i=0; i < receipts.length; i++) {
-//             var receipt = receipts[i];
-//             var receipt_id = receipt.id;
-//             var tag = [];
-//             //get tags and put them into each receipt
-//             for(var j = 0 ; j < all_tags.length ; j++) {
-//
-//                 if (all_tags[j].id == receipt_id) {
-//                         tag.push(all_tags[j].tag_name);
-//
-//                     }
-//                 }
-//             //append them into receipt row
-//             $(`<div class="row receipt">
-//                 <div class="col-sm-2 time">${receipt.created}</div>
-//                 <div class="col-sm-3 merchant">${receipt.merchantName}</div>
-//                 <div class="col-sm-1 amount">${receipt.value}</div>
-//                 <div class="col-sm-6 tags">
-//                     <button class="add_tag">add tag</button>
-//                     <input type="text" class="tag_input">
-//                     <span class="tagValue">`).appendTo($("#receiptList"));
-//
-//                     for (var j = 0 ; j < tag.length ; j++) {
-//                         $("#receiptList").append("<a href='#' class='RTags' name='"+receipt.id+","+tag[j]+"'>"+tag[j]+" x</a> ");
-//                     }
-//
-//                     $(`</span>
-//                 </div>
-//                </div>`).appendTo($("#receiptList"));
-//         }
-//
-//
-//     }).done(function(){
-//
-//         $(".add_tag").click(function() {
-//             $(this).siblings(".tag_input").toggle();
-//             // $(this).css( "display", "true" );
-//             // $(this).parent().append("<input type=\"text\" class=\"tag_input\">");
-//         })
-//
-//         $(".tag_input").on('keyup', function (e) {
-//             var tag_input_val = $(this).val();
-//             if (e.keyCode == 13) {
-//                 $(this).parent().append("<span>" + tag_input_val + "</span>");
-//             }
-//         });
-//     });
-//     addClickEvent();
-// }
-//
-// var get_netid = function() {
-//     $.ajax({
-//         // dataType: "json",
-//         url: api+"/netid"
-//         // data: data,
-//         // success: success
-//     }).done(function(data) {
-//         console.log(data);
-//     });
-// }
-//
-// var add_receipt = function() {
-//     $("#save-receipt").click(function() {
-//         var merchant = $("#merchant").val();
-//         var amount = $("#amount").val();
-//         $.ajax({
-//             type: "POST",
-//             url: api + "/receipts",
-//             data: JSON.stringify({"merchant":merchant, "amount":amount}),
-//             contentType: "application/json",
-//             dataType: "text"
-//         }).done(function() {
-//             $.getJSON(api+"/receipts", function(receipts){
-//                 var latest_receipt_idx = receipts.length - 1
-//                 var receipt = receipts[latest_receipt_idx];
-//                 $(`<div class="row receipt">
-//                     <div class="col-sm-2 time">${receipt.created}</div>
-//                     <div class="col-sm-3 merchant">${receipt.merchantName}</div>
-//                     <div class="col-sm-1 amount">${receipt.value}</div>
-//                     <div class="col-sm-6 tags">
-//                         <button class="add_tag">add tag</button>
-//                         <input type="text" class="tag_input">
-//                         <span class="tagValue"></span>
-//                     </div>
-//                 </div>`).appendTo($("#receiptList"));
-//             }).done(function(){
-//                 $(".add_tag").last().click(function() {
-//                     $(this).siblings(".tag_input").toggle();
-//                 })
-//
-//                 $(".tag_input").last().on('keyup', function (e) {
-//                     var tag_input_val = $(this).val();
-//                     if (e.keyCode == 13) {
-//                         $(this).parent().append("<span>" + tag_input_val + "</span>");
-//                     }
-//                 });
-//             })
-//         });
-//     })
-// }
-//
-// $("#cancel-receipt").click(function() {
-// 	$("#add-receipt").click();
-// 	$("#merchant").val('');
-// 	$("#amount").val('');
-// })
-//
-//
-// get_netid();
-// get_receipts();
-// add_receipt();
+// const api = "http://ec2-52-15-161-162.us-east-2.compute.amazonaws.com:8080";
+const api = "http://localhost:8080";
 
+
+var all_receipts = {};
+var all_tags = {};
+
+var m_name = "";
+var m_amount = 0;
+temp_id = 0;
+
+getReceipts();
+
+$("#add-receipt").click(function() {
+    $("#merchant").val("");
+    $("#amount").val("");
+});
+
+$("#cancel-receipt").click(function() {
+	$("#add-receipt").click();
+	$("#merchant").val('');
+	$("#amount").val('');
+})
+
+$("#save-receipt").click(function() {
+    var m_name = $("#merchant").val();
+    var m_amount = $("#amount").val();
+    postReceipt(m_name, parseInt(m_amount));
+    $("#receiptList").empty();
+    getReceipts();
+    $("#add-receipt").click();
+});
+
+function activateClicks() {
+    $(".add-tag").click(function() {
+        temp_id = parseInt(this.name);
+        var x = temp_id - 1;
+        var mark = x + all_receipts[temp_id-1].merchantName;
+        // append 
+        $(".tag_input").detach().appendTo("#" + mark);
+        $(".tag_input").val("");
+        $(".tag_input").toggle();
+
+    });
+
+    $(".tagValue").click(function() {
+        var s = this.name.split(",")
+        addTag(parseInt(s[0]),s[1]);
+        $("#receiptList").empty();
+        getReceipts();
+    });
+
+    $(".tag_input").on('keyup', function (e) {
+        var tag_input_val = $(this).val();
+        if (e.keyCode == 13) {
+            $(".tag_input").detach().appendTo("#receiptHeader");
+            $(".tag_input").toggle();
+            addTag(temp_id, tag_input_val);
+            
+            $("#receiptList").empty();
+            temp_id = 0;
+            getReceipts();
+        }
+    });    
+}
+
+function getReceipts() {
+    $.ajax({
+        url: api + "/receipts",
+        dataType: 'json',
+        async: false,
+    }).done(function(receipts){
+		all_receipts = receipts;
+        var receipt_count = all_receipts.length;
+
+        $.ajax({
+            url: api + "/tags",
+            dataType: 'json',
+            async: false,
+        }).done(function(data){
+        	all_tags = data;
+        });
+
+        var all_tags_count = all_tags.length;
+
+        for(var i=0; i<receipt_count; i++) {
+            var receipt = all_receipts[i];
+            var receipt_id = receipt.id;
+            
+            // get tag for each receipt
+            var tag = [];
+            for(var j=0; j<all_tags_count; j++) {
+                if (all_tags[j].receipt_id === receipt.id) {
+                    tag.push(all_tags[j].tag_name);
+                }
+            }
+
+            // append receipt row
+            var mark = i + receipt.merchantName;
+            var raw_component = $(`
+            	<div class="receipt row" id="${mark}">
+                    <div class="time col-sm-2"> ${receipt.created}</div>
+                    <div class="merchant col-sm-3">${receipt.merchantName}</div>
+                    <div class="amount col-sm-1">${receipt.value}</div>
+                    <div class="tags" col-sm-6></div>
+                </div>`);
+
+            $("#receiptList").append(raw_component);
+
+            $("#" + mark).append("<input type='button' class='add-tag' name='" + receipt.id + "' value='Add tag'>");
+            
+            for (var j=0; j<tag.length; j++) {
+                $("#"+mark).append("<a href='#' class='tagValue' name='" + receipt.id + "," + tag[j] + "'>" + tag[j] +"</a> ");
+            }
+
+        }    	
+    });
+    
+    $(".tag_input").hide();
+    activateClicks();
+}
+
+function postReceipt(m_name, m_amount) {
+    var receipt_info = {
+        "merchant": m_name,
+        "amount": m_amount
+    };
+
+    $.ajax({
+        method: "POST",
+        url: api + "/receipts",
+        contentType: "application/json",
+        dataType: 'json',
+        data: JSON.stringify(receipt_info),
+        async: false
+    });
+}
+
+function addTag(temp_id, tag) {
+    $.ajax({
+        method: "PUT",
+        url: api + "/tags/" + tag,
+        contentType: "application/json",
+        dataType: 'json',
+        data: JSON.stringify(temp_id),
+        async: false
+    });
+}
