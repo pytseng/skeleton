@@ -1,6 +1,4 @@
-import controllers.ReceiptController;
-import controllers.TagController;
-import controllers.StaticHtmlController;
+import controllers.*;
 import dao.ReceiptDao;
 import dao.TagDao;
 import io.dropwizard.Application;
@@ -44,8 +42,6 @@ public class SimpleApplication extends Application<Configuration> {
         // you need class and method @Path annotations!
         env.jersey().register(new StaticHtmlController());
         env.jersey().register(new ReceiptController(receiptDao));
-        env.jersey().register(new TagController(tagDao));
-
-        SimpleApplication.enableSessionSupport(env);
+        env.jersey().register(new ReceiptImageController());
     }
 }
