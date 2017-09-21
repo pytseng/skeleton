@@ -15,12 +15,12 @@ public class CreateTagTest {
 
     private final Validator validator = Validators.newValidator();
 
-    @Test
-    public void testMissingReceiptId() {
-        CreateTagRequest tag = new CreateTagRequest();
+    // @Test
+    // public void testMissingReceiptId() {
+    //     CreateTagRequest tag = new CreateTagRequest();
 
-        assertThat(validator.validate(tag), hasSize(1));
-    }
+    //     assertThat(validator.validate(tag), hasSize(1));
+    // }
 
 //    @Test
 //    public void testValid() {
