@@ -1,7 +1,10 @@
 package controllers;
 
+import java.util.List;
+import api.ReceiptSuggestionResponse;
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Collections;
 import javax.ws.rs.*;
@@ -14,7 +17,6 @@ import static java.lang.System.out;
 @Consumes(MediaType.TEXT_PLAIN)
 @Produces(MediaType.APPLICATION_JSON)
 public class ReceiptImageController {
-    //static final String apiKey = "AIzaSyAYdkyGx_Jb9CUVLLJ3sX3_s1Ej_ig3_iI";
     private final AnnotateImageRequest.Builder requestBuilder;
 
     public ReceiptImageController() {
@@ -36,7 +38,7 @@ public class ReceiptImageController {
      * }
      */
     @POST
-    public String parseReceipt(@NotEmpty String base64EncodedImage) throws Exception {
+public ReceiptSuggestionResponse parseReceipt(@NotEmpty String base64EncodedImage) throws Exception {
         Image img = Image.newBuilder().setContent(ByteString.copyFrom(Base64.getDecoder().decode(base64EncodedImage))).build();
         AnnotateImageRequest request = this.requestBuilder.setImage(img).build();
 
@@ -44,17 +46,31 @@ public class ReceiptImageController {
             BatchAnnotateImagesResponse responses = client.batchAnnotateImages(Collections.singletonList(request));
             AnnotateImageResponse res = responses.getResponses(0);
 
+            String merchantName = null;
+            BigDecimal amount = null;
+
             // Your Algo Here!!
             // Sort text annotations by bounding polygon.  Top-most non-decimal text is the merchant
             // bottom-most decimal text is the total amount
-            for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
-                out.printf("Position : %s\n", annotation.getBoundingPoly());
-                out.printf("Text: %s\n", annotation.getDescription());
+            List<EntityAnnotation> textAnnotations = res.getTextAnnotationsList();
+            if (!textAnnotations.isEmpty()) {
+                String topMostLine = textAnnotations.get(0).getDescription();
+                merchantName = topMostLine.split("[\n\r\t]")[0];
             }
 
-            // Not the right thing, but here for now.
-            TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
-            return fullTextAnnotation.getText();
+            amountFind:
+            for (int i = textAnnotations.size() - 1; i >= 0; i--) {
+                EntityAnnotation textAnnotation = textAnnotations.get(i);
+                String[] currentLineEles = textAnnotation.getDescription().split(" ");
+                for (String ele : currentLineEles) {
+                    if (ele.matches("[0-9]*(\\.[0-9]{2})?")) {
+                        amount = new BigDecimal(textAnnotation.getDescription());
+                        break amountFind;
+                    }
+                }
+            }
+            //TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
+            return new ReceiptSuggestionResponse(merchantName, amount);
         }
     }
 }

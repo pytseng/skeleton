@@ -6,10 +6,29 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        video {
+            width: 550px;
+            height: 450px;
+            border: 1px solid black;
+        }
+
+        #vidwrap {
+            margin: 20px 0;
+        }
+
+        #start, #snapshot {
+            height: 3em;
+        }
+    </style>    
     <script>
 $(function(){
-const api = "http://ec2-52-15-161-162.us-east-2.compute.amazonaws.com:8080";
-// const api = "http://localhost:8080";
+// const api = "http://ec2-52-15-161-162.us-east-2.compute.amazonaws.com:8080";
+const api = "http://localhost:8080";
 
 var all_receipts = {};
 var all_tags = {};
@@ -158,10 +177,74 @@ function activateClicks() {
     });    
 }
 
+// snapshot code from Adam
+        let imageCapture;
+        let track;
+
+        function attachMediaStream(mediaStream) {
+            $('video')[0].srcObject = mediaStream;
+
+            // Saving the track allows us to capture a photo
+            track = mediaStream.getVideoTracks()[0];
+            imageCapture = new ImageCapture(track);
+        }
+
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
+                .then(attachMediaStream)
+                .catch(error => {
+                    navigator.mediaDevices.getUserMedia({video: true})
+                        .then(attachMediaStream)
+                        .catch(error => {
+                            console.log('you are fooked');
+                        })
+                })
+        }
+
+        function takeSnapshot() {
+            // create a CANVAS element that is same size as the image
+            imageCapture.grabFrame()
+            .then(img => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
+                $.ajax({
+                    url: "/images",
+                    type: "POST",
+                    data: base64EncodedImageData,
+                    contentType: "text/plain",
+                    success: function() {},
+               })
+                .then(response => {
+                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+                })
+                .always(() => console.log('request complete'));
+
+                // For debugging, you can uncomment this to see the frame that was captured
+                // $('BODY').append(canvas);
+            });
+
+        }
+
+
+        $(function () {
+            $('#start').on('click', startVideo);
+            $('video').on('play', () => $('#snapshot').prop('disabled', false));
+            $('#snapshot').on('click', takeSnapshot);
+        });
 })
     </script>
 </head>
 <body>
+<button id="start">Start Video</button>
+<button id="snapshot" disabled="true">Take a Snapshot!</button>
+<br>
+<div id="vidwrap">
+    <video autoplay></video>
+</div> 
 <div class="container">
     <!--header with add button-->
     <div id="receiptHeader" class="row">

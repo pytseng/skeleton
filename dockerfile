@@ -14,8 +14,8 @@ ADD build/distributions/skeleton.tar  /
 ADD appconfig.yml /skeleton/
 
 # Add your GCP Service Account API File to the Docker Image
-ADD gc_api_file.json /skeleton/gc_api_file.json
-ENV GOOGLE_APPLICATION_CREDENTIALS=/skeleton/gc_api_file.json
+ADD gc_api_file.json /skeleton/My\ First\ Project-19470192d441.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=/skeleton/My\ First\ Project-19470192d441.json
 
 # Convenience if we ever want to log into the image and snoop around
 WORKDIR /skeleton
