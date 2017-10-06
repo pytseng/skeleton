@@ -189,6 +189,12 @@ function activateClicks() {
             imageCapture = new ImageCapture(track);
         }
 
+        function stopMediaStream() {
+            // $('video')[0].srcObject = mediaStream;
+            // track = mediaStream.getVideoTracks()[0];
+            track.stop();
+        }        
+
         function startVideo() {
             navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
                 .then(attachMediaStream)
@@ -196,7 +202,6 @@ function activateClicks() {
                     navigator.mediaDevices.getUserMedia({video: true})
                         .then(attachMediaStream)
                         .catch(error => {
-                            console.log('you are fooked');
                         })
                 })
         }
@@ -216,10 +221,18 @@ function activateClicks() {
                     type: "POST",
                     data: base64EncodedImageData,
                     contentType: "text/plain",
-                    success: function() {},
+                    success: function() {
+                        debugger;
+                    },
                })
                 .then(response => {
-                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+                    // stopMediaStream;
+                    $("#add-receipt").click();
+                    activateClicks();
+                    $("#merchant").val(response.merchantName);
+                    $("#amount").val(response.amount);
+                    $("#start-camera").click();
+                    // $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
                 })
                 .always(() => console.log('request complete'));
 
@@ -232,19 +245,17 @@ function activateClicks() {
 
         $(function () {
             $('#start').on('click', startVideo);
-            $('video').on('play', () => $('#snapshot').prop('disabled', false));
-            $('#snapshot').on('click', takeSnapshot);
+            $('video').on('play', () => $('#take-pic').prop('disabled', false));
+            $('video').on('play', () => $('#take-pic-cancel').prop('disabled', false));
+            $('#take-pic').on('click', takeSnapshot);
+            $('#take-pic-cancel').on('click', stopMediaStream);
+            $('#start-camera').on('click', stopMediaStream);
         });
 })
     </script>
 </head>
 <body>
-<button id="start">Start Video</button>
-<button id="snapshot" disabled="true">Take a Snapshot!</button>
-<br>
-<div id="vidwrap">
-    <video autoplay></video>
-</div> 
+
 <div class="container">
     <!--header with add button-->
     <div id="receiptHeader" class="row">
@@ -252,6 +263,9 @@ function activateClicks() {
         <button id="add-receipt" class="col-sm-2 btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
             <i class="fa fa-plus" aria-hidden="true"></i>
         </button>
+        <button id="start-camera" class="col-sm-2 btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseSnapShot" aria-expanded="false" aria-controls="collapseSnapShot">
+            camera 
+        </button>        
     </div>
     <!--drop down panel of add button-->
     <div class="collapse" id="collapseExample">
@@ -263,6 +277,19 @@ function activateClicks() {
 
         <input type="button" value="Cancel" id="cancel-receipt">
         <input type="submit" value="Save" id="save-receipt">
+    </div>
+    <div class="collapse" id="collapseSnapShot">
+        <button id="start">Start Video</button>
+        <button id="take-pic" disabled="true">Take a Snapshot!</button>
+        <button id="take-pic-cancel" disabled="true"> Cancel video</button>
+        <br>
+        <div id="vidwrap">
+            <video autoplay></video>
+        </div> 
+
+
+<!--         <input type="button" value="Cancel" id="cancel-receipt">
+        <input type="submit" value="Save" id="save-receipt"> -->
     </div>
     
     <div id="receiptHead" class="row">

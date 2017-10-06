@@ -7,6 +7,8 @@ import com.google.protobuf.ByteString;
 import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -47,29 +49,30 @@ public ReceiptSuggestionResponse parseReceipt(@NotEmpty String base64EncodedImag
             AnnotateImageResponse res = responses.getResponses(0);
 
             String merchantName = null;
-            BigDecimal amount = null;
+            String amount = null;
 
             // Your Algo Here!!
             // Sort text annotations by bounding polygon.  Top-most non-decimal text is the merchant
             // bottom-most decimal text is the total amount
-            List<EntityAnnotation> textAnnotations = res.getTextAnnotationsList();
-            if (!textAnnotations.isEmpty()) {
-                String topMostLine = textAnnotations.get(0).getDescription();
-                merchantName = topMostLine.split("[\n\r\t]")[0];
-            }
+            for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
+                Pattern p = Pattern.compile("\\d+\\.\\d+");
+                String first = res.getTextAnnotationsList().iterator().next().getDescription();
+                String[] cuts = first.split("\n");
 
-            amountFind:
-            for (int i = textAnnotations.size() - 1; i >= 0; i--) {
-                EntityAnnotation textAnnotation = textAnnotations.get(i);
-                String[] currentLineEles = textAnnotation.getDescription().split(" ");
-                for (String ele : currentLineEles) {
-                    if (ele.matches("[0-9]*(\\.[0-9]{2})?")) {
-                        amount = new BigDecimal(textAnnotation.getDescription());
-                        break amountFind;
+                for(int i = 0; i < cuts.length; i++) {
+                    Matcher m =p.matcher(cuts[i]);
+                    if (m.find()){
+                        amount = m.group();
+                    }
+                    if (i == 1){
+                        merchantName = cuts[i];
                     }
                 }
+                out.printf("merchantName: %s \t amount: %s\n", merchantName, amount);
+
+                // TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
+                return new ReceiptSuggestionResponse(merchantName, amount); 
             }
-            //TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
             return new ReceiptSuggestionResponse(merchantName, amount);
         }
     }

@@ -11,10 +11,10 @@ public class ReceiptSuggestionResponse {
     public final String merchantName;
 
     @JsonProperty
-    public final BigDecimal amount;
+    public final String amount;
 
 
-    public ReceiptSuggestionResponse(String merchantName, BigDecimal amount) {
+    public ReceiptSuggestionResponse(String merchantName, String amount) {
         this.merchantName = merchantName;
         this.amount = amount;
     }
